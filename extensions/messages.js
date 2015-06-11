@@ -285,3 +285,59 @@ WhatsApi.prototype.sendVcard = function(to, filepath, name, msgid, callback) {
 		}.bind(this));
 	}.bind(this));
 };
+
+/**
+ * @private
+ */
+WhatsApi.prototype.sendBroadcastMessageNode = function(to, node, msgid, callback) {
+	if (!this.loggedIn) {
+		this.queue.push({to : to, node : node});
+		return;
+	}
+
+	toNodes = [];
+	for (var i = 0; i < to.length; i++) {
+		t = {'jid': this.createJID(to[i])};
+		toNodes.push(new protocol.Node('to', t, null));
+	}
+	var broadcastNode = new protocol.Node('broadcast', null, toNodes);
+	
+	var messageId = msgid || this.nextMessageId('message');
+	this.addCallback(messageId, callback);
+
+	currentTime = common.tstamp();
+	
+	var attributes = {
+		to   : currentTime + '@broadcast',
+		type : (node.tag() === 'body' ? 'text' : 'media'),
+		id   : messageId,
+		t    : common.tstamp().toString()
+	};
+	var messageNode = new protocol.Node('message', attributes, [node, broadcastNode]);
+	this.sendNode(messageNode);
+};
+
+WhatsApi.prototype.sendBroadcastMessage = function(to, message, msgid, callback) {
+	// Convert arguments to array
+	var args = [];
+	for (var i = 0; i < arguments.length; i++) {
+		args.push(arguments[i]);
+	}
+	
+	// Remove first 2 required arguments
+	args.splice(0, 2);
+	
+	// Get last argument
+	callback = args.pop();
+	
+	// Get optional msgid
+	if (args.length > 0) {
+		msgid = args.shift();
+	}
+	else {
+		msgid = null;
+	}
+	
+	var bodyNode = new protocol.Node('body', null, null, message);
+	this.sendBroadcastMessageNode(to, bodyNode, msgid, callback);
+};
