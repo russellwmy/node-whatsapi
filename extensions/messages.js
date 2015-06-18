@@ -302,14 +302,14 @@ WhatsApi.prototype.sendBroadcastMessageNode = function(to, node, msgid, callback
 	}
 	var broadcastNode = new protocol.Node('broadcast', null, toNodes);
 	
-	var messageId = msgid || this.nextMessageId('message');
+	var messageId = msgid || this.nextMessageId();
 	this.addCallback(messageId, callback);
 
 	currentTime = common.tstamp();
 	
 	var attributes = {
 		to   : currentTime + '@broadcast',
-		type : (node.tag() === 'body' ? 'text' : 'media'),
+		type : 'text',
 		id   : messageId,
 		t    : common.tstamp().toString()
 	};
