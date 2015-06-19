@@ -302,7 +302,7 @@ WhatsApi.prototype.sendBroadcastMessageNode = function(to, node, msgid, callback
 	}
 	var broadcastNode = new protocol.Node('broadcast', null, toNodes);
 	
-	var messageId = msgid || this.nextMessageId();
+	var messageId = msgid || this.nextMessageId('broadcast');
 	this.addCallback(messageId, callback);
 
 	currentTime = common.tstamp();
